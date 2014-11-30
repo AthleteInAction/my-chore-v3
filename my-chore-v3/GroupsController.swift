@@ -10,9 +10,13 @@ import UIKit
 
 class GroupsController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
-    var refreshControl: UIRefreshControl!
+    var peopleView: PeopleController!
+    var changeNameView: ChangeNameController!
     
-    var groups: [PFObject] = []
+    var refreshControl: UIRefreshControl!
+    var tmp_title: String!
+    
+    var groups: [Group] = []
     var selectedGroup: PFObject!
     
     @IBOutlet weak var groupsTBL: UITableView!
@@ -24,54 +28,128 @@ class GroupsController: UIViewController, UITableViewDataSource, UITableViewDele
         groupsTBL.dataSource = self
         
         refreshControl = UIRefreshControl()
-        refreshControl.attributedTitle = NSAttributedString(string: "Pull to refersh")
         refreshControl.addTarget(self, action: "loadData", forControlEvents: UIControlEvents.ValueChanged)
         groupsTBL.addSubview(refreshControl)
+        
+        tmp_title = navigationItem.title
+        
+        peopleView = storyboard?.instantiateViewControllerWithIdentifier("people_controller") as PeopleController
+        changeNameView = storyboard?.instantiateViewControllerWithIdentifier("change_name_controller") as ChangeNameController
+        
+    }
+    
+    class Group {
+        
+        var group: PFObject!
+        var admin: Bool = false
+        var creator: Bool = false
+        
+        init(){}
         
     }
     
     func loadData(){
         
-        var tmp_groups: [PFObject] = []
+//        navigationItem.title = "Loading..."
         
-        var query1 = PFQuery(className: "Groups")
-        query1.whereKey("users", containedIn: [currentUser])
+        var admins_done = false
+        var users_done = false
         
-        var query2 = PFQuery(className: "Groups")
-        query2.whereKey("admins", containedIn: [currentUser])
+        var tmp_groups: [Group] = []
         
-        var query = PFQuery.orQueryWithSubqueries([query1,query2])
+        var users_query = PFQuery(className: "Groups")
+        users_query.whereKey("users", containedIn: [currentUser])
         
-        query.findObjectsInBackgroundWithBlock { (objects: [AnyObject]!, error: NSError!) -> Void in
+        var admins_query = PFQuery(className: "Groups")
+        admins_query.whereKey("admins", containedIn: [currentUser])
+        
+        users_query.findObjectsInBackgroundWithBlock { (objects: [AnyObject]!, error: NSError!) -> Void in
             
             if !(error != nil){
                 
                 for object in objects {
                     
                     var group = object as PFObject
-                    tmp_groups.append(group)
+                    
+                    var tmp_group = Group()
+                    tmp_group.group = group
+                    
+                    tmp_groups.append(tmp_group)
                     
                 }
                 
             } else {
                 
-                NSLog("QUERY ERROR")
+                NSLog("USERS QUERY ERROR")
                 
             }
             
-            self.groups = tmp_groups
+            users_done = true
             
-            self.groupsTBL.reloadData()
-            self.refreshControl.endRefreshing()
+            if admins_done {
+                
+                self.setData(tmp_groups)
+                
+            }
+            
+        }
+        
+        admins_query.findObjectsInBackgroundWithBlock { (objects: [AnyObject]!, error: NSError!) -> Void in
+            
+            if !(error != nil){
+                
+                for object in objects {
+                    
+                    var group = object as PFObject
+                    
+                    var tmp_group = Group()
+                    tmp_group.group = group
+                    tmp_group.admin = true
+                    
+                    var creator = group["creator"] as PFUser
+                    
+                    if creator.objectId == currentUser.objectId {
+                        
+                        tmp_group.creator = true
+                        
+                    }
+                    
+                    tmp_groups.append(tmp_group)
+                    
+                }
+                
+            } else {
+                
+                NSLog("ADMINS QUERY ERROR")
+                
+            }
+            
+            admins_done = true
+            
+            if users_done {
+                
+                self.setData(tmp_groups)
+                
+            }
             
         }
         
     }
     
+    func setData(tmp_groups: Array<Group>){
+        
+        self.groups = tmp_groups
+        
+        self.groupsTBL.reloadData()
+        
+//        self.navigationItem.title = self.tmp_title
+        
+        self.refreshControl.endRefreshing()
+        
+    }
+    
     override func viewWillAppear(animated: Bool) {
         
-        groupsTBL.contentOffset = CGPointMake(0, -refreshControl.frame.size.height)
-        refreshControl.beginRefreshing()
         loadData()
         
     }
@@ -103,9 +181,9 @@ class GroupsController: UIViewController, UITableViewDataSource, UITableViewDele
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCellWithIdentifier("cell") as UITableViewCell
+        var cell: GroupCell = tableView.dequeueReusableCellWithIdentifier("cell") as GroupCell
         
-        cell.textLabel.text = groups[indexPath.row]["name"] as? String
+        cell.nameTXT.text = groups[indexPath.row].group["name"] as? String
         
         return cell
         
@@ -113,9 +191,12 @@ class GroupsController: UIViewController, UITableViewDataSource, UITableViewDele
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         
-        selectedGroup = groups[indexPath.row]
+        selectedGroup = groups[indexPath.row].group
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
-        self.performSegueWithIdentifier("group_selected", sender: self)
+        
+        peopleView.group = selectedGroup
+        peopleView.loadData()
+        navigationController?.pushViewController(peopleView, animated: true)
         
     }
     
@@ -139,46 +220,96 @@ class GroupsController: UIViewController, UITableViewDataSource, UITableViewDele
     
     func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [AnyObject]?  {
         
-        var editAction = UITableViewRowAction(style: UITableViewRowActionStyle.Default, title: "Edit" , handler: { (action:UITableViewRowAction!, indexPath:NSIndexPath!) -> Void in
+        var group: Group = groups[indexPath.row] as Group
+        var group_name = group.group["name"] as String
+        selectedGroup = group.group
+        var currentCell: GroupCell = tableView.cellForRowAtIndexPath(indexPath) as GroupCell
+        
+        var editAction = UITableViewRowAction(style: UITableViewRowActionStyle.Default, title: "Edit" , handler: { (eaction:UITableViewRowAction!, indexPath:NSIndexPath!) -> Void in
             
-            let editMenu = UIAlertController(title: nil, message: "Edit", preferredStyle: .ActionSheet)
+            let editMenu = UIAlertController(title: "Edit", message: nil, preferredStyle: .ActionSheet)
             
-            let changeName = UIAlertAction(title: "Change Name", style: UIAlertActionStyle.Default, handler: nil)
+            let changeName = UIAlertAction(title: "Change Name", style: UIAlertActionStyle.Default, handler: {(action: UIAlertAction!) -> Void in
+                
+                tableView.setEditing(false, animated: true)
+                editMenu.dismissViewControllerAnimated(false, completion: nil)
+                
+                self.changeNameView.group = self.selectedGroup
+                self.navigationController?.pushViewController(self.changeNameView, animated: true)
+            
+            })
+            
+            let addPeople = UIAlertAction(title: "Add People", style: UIAlertActionStyle.Default, handler: nil)
+            
+            let leaveGroup = UIAlertAction(title: "Leave Group", style: UIAlertActionStyle.Destructive, handler: nil)
+            
+            let deleteGroup = UIAlertAction(title: "Delete Group", style: UIAlertActionStyle.Destructive, handler: {(alert: UIAlertAction!) in
+                
+                var confirmAlert: UIAlertController!
+                
+                confirmAlert = UIAlertController(title: "Confirm", message: "Are you sure you wish to delete \(group_name)?", preferredStyle: UIAlertControllerStyle.Alert)
+                
+                confirmAlert.addAction(UIAlertAction(title: "Delete", style: .Destructive, handler: { (action: UIAlertAction!) in
+                    
+                    currentCell.loader.startAnimating()
+                    
+                    group.group.deleteInBackgroundWithBlock({ (success: Bool!, error: NSError!) -> Void in
+                        
+                        if !(error != nil) {
+                            
+                            self.groups.removeAtIndex(indexPath.row)
+                            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
+                            
+                        } else {
+                            
+                            NSLog("DELETE ERROR")
+                            
+                        }
+                        
+                        currentCell.loader.startAnimating()
+                        
+                    })
+                    
+                }))
+                
+                confirmAlert.addAction(UIAlertAction(title: "Cancel", style: .Default, handler: { (action: UIAlertAction!) in
+                    
+                    
+                    
+                }))
+                
+                self.presentViewController(confirmAlert, animated: true, completion: nil)
+                
+            })
+            
             let cancelAction = UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel, handler: nil)
             
-            editMenu.addAction(changeName)
+            if group.admin {
+                
+                editMenu.addAction(changeName)
+                editMenu.addAction(addPeople)
+                
+            }
+            
+            if group.creator {
+                
+                editMenu.addAction(deleteGroup)
+                
+            } else {
+                
+                editMenu.addAction(leaveGroup)
+                
+            }
+            
             editMenu.addAction(cancelAction)
             
             self.presentViewController(editMenu, animated: true, completion: nil)
             
         })
         
-        var deleteAction = UITableViewRowAction(style: UITableViewRowActionStyle.Default, title: "Delete" , handler: { (action:UITableViewRowAction!, indexPathB:NSIndexPath!) -> Void in
-            
-            var group_name: String = self.groups[indexPath.row]["name"] as String
-            
-            var confirmAlert = UIAlertController(title: "Confirm", message: "Are you sure you want to delete this group: \(group_name)", preferredStyle: UIAlertControllerStyle.Alert)
-            
-            confirmAlert.addAction(UIAlertAction(title: "Delete", style: .Destructive, handler: { (action: UIAlertAction!) in
-                
-                self.groups.removeAtIndex(indexPath.row)
-                tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Fade)
-                
-            }))
-            
-            confirmAlert.addAction(UIAlertAction(title: "Cancel", style: .Default, handler: { (action: UIAlertAction!) in
-                
-                
-            }))
-            
-            self.presentViewController(confirmAlert, animated: true, completion: nil)
-            
-        })
-        
         editAction.backgroundColor = UIColor.grayColor()
-        deleteAction.backgroundColor = UIColor.redColor()
         
-        return [deleteAction,editAction]
+        return [editAction]
         
     }
     
@@ -186,7 +317,15 @@ class GroupsController: UIViewController, UITableViewDataSource, UITableViewDele
         
         if (segue.identifier == "group_selected") {
             
-            var svc = segue.destinationViewController as PeopleController
+            var svc1 = segue.destinationViewController as PeopleController
+            
+            svc1.group = selectedGroup
+            
+        }
+        
+        if (segue.identifier == "change_group_name") {
+            
+            var svc = segue.destinationViewController as ChangeNameController
             
             svc.group = selectedGroup
             

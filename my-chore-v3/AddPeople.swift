@@ -10,6 +10,8 @@ import UIKit
 
 class AddPeople: UITableViewController, UISearchBarDelegate {
     
+    var from: String!
+    
     var phoneContacts: [Contact] = []
     var appContacts: [Contact] = []
     var filteredAppContacts: [Contact] = []
@@ -303,6 +305,7 @@ class AddPeople: UITableViewController, UISearchBarDelegate {
             
             if !(error != nil) {
                 
+                NSLog("SUCCESS")
                 self.performSegueWithIdentifier("groups_from_new_group", sender: self)
                 
             } else {

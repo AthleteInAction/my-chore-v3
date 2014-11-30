@@ -14,17 +14,15 @@ class PeopleController: UIViewController, UITableViewDataSource, UITableViewDele
     
     var phoneContacts: [Contact] = []
     var am_i_admin: Bool = false
+    var tmp_title: String!
     
     var group: PFObject!
     var people: [Contact] = []
     
     @IBOutlet weak var peopleTBL: UITableView!
-    @IBOutlet weak var addBTN: UIBarButtonItem!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        self.title = group["name"] as? String
         
         phoneContacts = Contacts.getContacts()!
         
@@ -32,16 +30,14 @@ class PeopleController: UIViewController, UITableViewDataSource, UITableViewDele
         peopleTBL.dataSource = self
         
         refreshControl = UIRefreshControl()
-        refreshControl.attributedTitle = NSAttributedString(string: "Pull to refersh")
         refreshControl.addTarget(self, action: "loadData", forControlEvents: UIControlEvents.ValueChanged)
         peopleTBL.addSubview(refreshControl)
-        
-        addBTN.enabled = false
-        addBTN.tintColor = UIColor.clearColor()
         
     }
     
     func loadData(){
+        
+        self.title = group["name"] as? String
         
         var tmp_people: [Contact] = []
         
@@ -153,18 +149,14 @@ class PeopleController: UIViewController, UITableViewDataSource, UITableViewDele
     
     func setData(tmp_people: Array<Contact>){
         
-        if am_i_admin {
-            
-            addBTN.enabled = true
-            addBTN.tintColor = nil
-            
-        }
-        
         people = tmp_people
         
         orderPeople()
         
         peopleTBL.reloadData()
+        
+//        navigationItem.title = group["name"] as? String
+        
         refreshControl.endRefreshing()
         
     }
@@ -192,9 +184,7 @@ class PeopleController: UIViewController, UITableViewDataSource, UITableViewDele
     
     override func viewWillAppear(animated: Bool) {
         
-        peopleTBL.contentOffset = CGPointMake(0, -refreshControl.frame.size.height)
-        refreshControl.beginRefreshing()
-        loadData()
+//        loadData()
         
     }
 

@@ -13,6 +13,8 @@
 		A62AFDDF1A2889C7002C4EEE /* PeopleController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A62AFDDE1A2889C7002C4EEE /* PeopleController.swift */; };
 		A62AFDE21A289403002C4EEE /* Parse.swift in Sources */ = {isa = PBXBuildFile; fileRef = A62AFDE11A289403002C4EEE /* Parse.swift */; };
 		A62AFDE41A29F72E002C4EEE /* PeopleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A62AFDE31A29F72E002C4EEE /* PeopleCell.swift */; };
+		A62AFDE61A2AE4D9002C4EEE /* ChangeNameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A62AFDE51A2AE4D9002C4EEE /* ChangeNameController.swift */; };
+		A62AFDE81A2B06C0002C4EEE /* GroupCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A62AFDE71A2B06C0002C4EEE /* GroupCell.swift */; };
 		A68780021A25D7040095CE2D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A68780011A25D7040095CE2D /* AppDelegate.swift */; };
 		A68780051A25D7040095CE2D /* my_chore_v3.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = A68780031A25D7040095CE2D /* my_chore_v3.xcdatamodeld */; };
 		A68780071A25D7040095CE2D /* CheckController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A68780061A25D7040095CE2D /* CheckController.swift */; };
@@ -56,6 +58,8 @@
 		A62AFDDE1A2889C7002C4EEE /* PeopleController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeopleController.swift; sourceTree = "<group>"; };
 		A62AFDE11A289403002C4EEE /* Parse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Parse.swift; sourceTree = "<group>"; };
 		A62AFDE31A29F72E002C4EEE /* PeopleCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PeopleCell.swift; sourceTree = "<group>"; };
+		A62AFDE51A2AE4D9002C4EEE /* ChangeNameController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangeNameController.swift; sourceTree = "<group>"; };
+		A62AFDE71A2B06C0002C4EEE /* GroupCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GroupCell.swift; sourceTree = "<group>"; };
 		A6877FFC1A25D7040095CE2D /* my-chore-v3.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "my-chore-v3.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A68780001A25D7040095CE2D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A68780011A25D7040095CE2D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -132,6 +136,8 @@
 				A68780441A25FCB50095CE2D /* GroupsController.swift */,
 				A62AFDDE1A2889C7002C4EEE /* PeopleController.swift */,
 				A62AFDE31A29F72E002C4EEE /* PeopleCell.swift */,
+				A62AFDE51A2AE4D9002C4EEE /* ChangeNameController.swift */,
+				A62AFDE71A2B06C0002C4EEE /* GroupCell.swift */,
 			);
 			name = Groups;
 			sourceTree = "<group>";
@@ -345,8 +351,10 @@
 				A68780411A25F3810095CE2D /* NameController.swift in Sources */,
 				A68780451A25FCB50095CE2D /* GroupsController.swift in Sources */,
 				A68780071A25D7040095CE2D /* CheckController.swift in Sources */,
+				A62AFDE81A2B06C0002C4EEE /* GroupCell.swift in Sources */,
 				A62AFDD61A2613B7002C4EEE /* Contact.swift in Sources */,
 				A62AFDDA1A2616DA002C4EEE /* Contacts.swift in Sources */,
+				A62AFDE61A2AE4D9002C4EEE /* ChangeNameController.swift in Sources */,
 				A68780051A25D7040095CE2D /* my_chore_v3.xcdatamodeld in Sources */,
 				A68780021A25D7040095CE2D /* AppDelegate.swift in Sources */,
 				A62AFDE21A289403002C4EEE /* Parse.swift in Sources */,
@@ -480,10 +488,12 @@
 					"$(PROJECT_DIR)",
 				);
 				INFOPLIST_FILE = "my-chore-v3/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "my-chore-v3/my-chore-v3-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -497,9 +507,11 @@
 					"$(PROJECT_DIR)",
 				);
 				INFOPLIST_FILE = "my-chore-v3/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "my-chore-v3/my-chore-v3-Bridging-Header.h";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
